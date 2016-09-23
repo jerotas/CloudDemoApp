@@ -1,0 +1,38 @@
+﻿@using DotNet5CloudWeb.Controllers
+@model  DotNet5CloudWeb.Models.QueryAlbumsModel
+@{
+    ViewBag.Title = "Query Albums";
+}
+<h2>@ViewBag.Title</h2>
+<h3>@ViewBag.Message</h3>
+
+@using (Html.BeginForm(nameof(AlbumController.QueryAlbums), "Album", FormMethod.Post))  {
+    @Html.AntiForgeryToken();
+    @:Pick album name:
+    <select name="@nameof(Model.AlbumNameFilter)">
+        <option>-All-</option>
+        @foreach (var album in Model.AlbumNames)
+        {
+            <option>@album</option>
+        }
+    </select>
+    @:&nbsp;
+    <button type="submit">Get Details</button>
+}
+<hr/>
+<table width="80%" >
+    <tr>
+        <th>Artist</th>
+        <th>Album</th>
+        <th>Year</th>
+        <th>Copies Sold</th>
+    </tr>
+    @foreach (var disc in Model.AlbumDetails) {
+        <tr>
+            <td>@disc.ArtistName</td>
+            <td>@disc.Name</td>
+            <td>@disc.Year</td>
+            <td>@disc.CopiesSold</td>
+        </tr>
+    }
+</table>
