@@ -22,12 +22,10 @@ namespace DotNet5CloudWeb.Controllers {
 
         private string DocumentDbAuthKey => ConfigurationManager.AppSettings["DDbMasterKey"];
 
-        private List<string> CachedAlbumNames
-        {
-            get
-            {
-                if (Session[AlbumNamesKey] != null)
-                {
+        #region Properties
+        private List<string> CachedAlbumNames {
+            get {
+                if (Session[AlbumNamesKey] != null) {
                     return Session[AlbumNamesKey] as List<string>;
                 }
 
@@ -46,8 +44,10 @@ namespace DotNet5CloudWeb.Controllers {
                 Session[AlbumNamesKey] = names;
                 return names;
             }
-        } 
+        }
+        #endregion
 
+        #region Actions
         public ActionResult QueryAlbums() {
             var model = new QueryAlbumsModel {AlbumNames = CachedAlbumNames };
 
@@ -69,6 +69,13 @@ namespace DotNet5CloudWeb.Controllers {
             return View(model);
         }
 
+        public ActionResult Credits()
+        {
+            return View();
+        }
+        #endregion
+
+        #region Helper methods
         private IList PerformQuery(string query) {
             var ddbClient = new DocumentClient(new Uri(DocumentDbEndPoint), DocumentDbAuthKey);
             var db = ddbClient.CreateDatabaseQuery()
@@ -101,5 +108,6 @@ namespace DotNet5CloudWeb.Controllers {
 
             return discographies;
         }
+        #endregion
     }
 }
