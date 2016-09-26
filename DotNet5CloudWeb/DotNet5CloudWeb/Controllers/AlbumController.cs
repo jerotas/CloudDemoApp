@@ -11,7 +11,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DotNet5CloudWeb.Controllers {
-    public class AlbumController : Controller {
+    public class AlbumController : Controller
+    {
+        public const string NoFilterWord = "-All-";
+
         private const string DbName = "Albums";
         private const string AlbumNamesKey = "~AlbumNames~";
 
@@ -77,7 +80,7 @@ namespace DotNet5CloudWeb.Controllers {
 
         private List<Album> SearchDiscographies(QueryAlbumsModel model) {
             var query = "SELECT D.ArtistName, Albums.Name, Albums.Year, Albums.Label, Albums.CopiesSold FROM RockAlbums D JOIN Albums in D.Albums";
-            if (!string.IsNullOrWhiteSpace(model.AlbumNameFilter)) {
+            if (!string.IsNullOrWhiteSpace(model.AlbumNameFilter) && model.AlbumNameFilter != NoFilterWord) {
                 query += $" WHERE Albums.Name = '{model.AlbumNameFilter}'";
             }
 

@@ -10,10 +10,10 @@
     @Html.AntiForgeryToken();
     @:Pick album name:
     <select name="@nameof(Model.AlbumNameFilter)">
-        <option>-All-</option>
+        <option>@AlbumController.NoFilterWord</option>
         @foreach (var album in Model.AlbumNames)
         {
-            <option>@album</option>
+            <option @(Model.AlbumNameFilter == album  ? "selected" : "")>@album</option>
         }
     </select>
     @:&nbsp;
