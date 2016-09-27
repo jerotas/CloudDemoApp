@@ -11,8 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DotNet5CloudWeb.Controllers {
-    public class AlbumController : Controller
-    {
+    public class AlbumController : Controller {
         public const string NoFilterWord = "-All-";
 
         private const string DbName = "Albums";
@@ -29,15 +28,10 @@ namespace DotNet5CloudWeb.Controllers {
                     return Session[AlbumNamesKey] as List<string>;
                 }
 
-                var albumNames = PerformQuery("SELECT Albums.Name FROM RockAlbums D JOIN Albums in D.Albums");
+                var albumNames = PerformQuery("SELECT VALUE Albums.Name FROM RockAlbums D JOIN Albums in D.Albums");
 
                 var names = new List<string>(albumNames.Count);
-
-                foreach (var album in albumNames) {
-                    JToken token = JObject.Parse(album.ToString());
-                    var albumName = (string)token.SelectToken("Name");
-                    names.Add(albumName);
-                }
+                names.AddRange(from object albumName in albumNames select albumName as JValue into val select val.Value as string);
 
                 names.Sort();
 
@@ -49,7 +43,7 @@ namespace DotNet5CloudWeb.Controllers {
 
         #region Actions
         public ActionResult QueryAlbums() {
-            var model = new QueryAlbumsModel {AlbumNames = CachedAlbumNames };
+            var model = new QueryAlbumsModel { AlbumNames = CachedAlbumNames };
 
             model.AlbumDetails = SearchDiscographies(model);
 
@@ -69,8 +63,7 @@ namespace DotNet5CloudWeb.Controllers {
             return View(model);
         }
 
-        public ActionResult Credits()
-        {
+        public ActionResult Credits() {
             return View();
         }
         #endregion
@@ -85,25 +78,59 @@ namespace DotNet5CloudWeb.Controllers {
             return ddbClient.CreateDocumentQuery(collectionQueryUri, query).ToList();
         }
 
-        private List<Album> SearchDiscographies(QueryAlbumsModel model) {
-            var query = "SELECT D.ArtistName, Albums.Name, Albums.Year, Albums.Label, Albums.CopiesSold FROM RockAlbums D JOIN Albums in D.Albums";
-            if (!string.IsNullOrWhiteSpace(model.AlbumNameFilter) && model.AlbumNameFilter != NoFilterWord) {
-                query += $" WHERE Albums.Name = '{model.AlbumNameFilter}'";
+        private List<AlbumCollection> SearchDiscographies(QueryAlbumsModel model) {
+            var query = string.Empty;
+
+            if (model.HasFilter) {
+                query = "SELECT C.ArtistName, "
+                    + "{ " +
+                            "\"Name\": A.Name, " +
+                            "\"Year\": A.Year, " +
+                            "\"Label\": A.Label, " +
+                            "\"CopiesSold\": A.CopiesSold " +
+                        "} AS Album, "
+                        +
+                        "{ " +
+                            "\"First\": M.FirstName, " +
+                            "\"Last\": M.LastName, " +
+                            "\"Instrument\": M.Instrument " +
+                        "} AS Member " +
+                        "FROM C " +
+                        "JOIN A IN C.Albums " +
+                        "JOIN M IN A.Members"
+                        + $" WHERE A.Name = '{model.AlbumNameFilter}'";
+            } else {
+                query = "SELECT  C.ArtistName, " +
+                        "{ " +
+                            "\"Name\": A.Name, " +
+                            "\"Year\": A.Year, " +
+                            "\"Label\": A.Label, " +
+                            "\"CopiesSold\": A.CopiesSold " +
+                        "} AS Album "
+                        + "FROM C " +
+                        "JOIN A IN C.Albums";
             }
 
             var filteredDiscographies = PerformQuery(query);
 
-            var discographies = new List<Album>();
+            var discographies = new List<AlbumCollection>();
 
+            var counter = 0;
             foreach (var discJSON in filteredDiscographies) {
-                //    //JToken token = JObject.Parse(college.ToString());
-                //    //var cName = (string)token.SelectToken("collegeName");
-                //    //var branchId = (string) token.SelectToken("branches[0].branchId");
+                //JToken token = JObject.Parse(discJSON.ToString());
+                //var artistName = (string)token.SelectToken("ArtistName");
+                //var albumLabel = (string) token.SelectToken("Album.Label");
 
-                Album deser = JsonConvert.DeserializeObject<Album>(discJSON.ToString());
+                var deser = JsonConvert.DeserializeObject<AlbumCollection>(discJSON.ToString());
+
+                if (model.HasFilter) {
+                    if (counter > 0) {
+                        deser.Album = null; // don't show album info
+                        deser.ArtistName = null; // don't show album name for "member" rows
+                    }
+                }
                 discographies.Add(deser);
-
-                //Console.Write($"\t Result is college: {deser.ArtistName}");
+                counter++;
             }
 
             return discographies;

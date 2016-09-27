@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DotNet5CloudWeb.Controllers;
 using DotNet5CloudWeb.Models.DocumentDbModels;
 
 namespace DotNet5CloudWeb.Models {
@@ -11,6 +12,8 @@ namespace DotNet5CloudWeb.Models {
 
         public string AlbumNameFilter { get; set; }
         public List<string> AlbumNames { get; set; } 
-        public List<Album> AlbumDetails { get; set; }
+        public List<AlbumCollection> AlbumDetails { get; set; }
+
+        public bool HasFilter => !string.IsNullOrWhiteSpace(AlbumNameFilter) && AlbumNameFilter != AlbumController.NoFilterWord;
     }
 }
