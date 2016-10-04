@@ -1,0 +1,40 @@
+﻿@model DotNet5CloudWeb.Models.InvoicesModel
+@{
+    ViewBag.Title = "All Invoices";
+}
+<h2>@ViewBag.Title</h2>
+<h3>@ViewBag.Message</h3>
+
+<table border="1" cellpadding="4">
+    <tr style="background-color:lightgray">
+        <th>Order Id</th>
+        <th>Order Date</th>
+        <th>Address</th>
+        <th>Ship Info</th>
+        <th>Product</th>
+    </tr>
+    @foreach (var invoice in Model.Invoices) {
+        <tr valign="top">
+            <td>@Html.ActionLink(@invoice.OrderId.ToString(), "FilterInvoices", "Invoice", new { orderId = @invoice.OrderId.ToString() }, null)</td>
+            <td>@invoice.OrderDate.ToShortDateString()</td>
+            <td>
+                <div>@invoice.Address.Name</div>
+                <div>@invoice.Address.Street</div>
+                <div>@invoice.Address.City, @invoice.Address.Country @invoice.Address.PostalCode</div>
+            </td>
+            <td>
+                <div><b>Ship Date:</b> @invoice.ShipInfo.ShippedDate</div>
+                <div><b>Shipper Name:</b> @invoice.ShipInfo.ShipperName</div>
+                <div><b>Freight:</b> @invoice.ShipInfo.Freight.ToString("C")</div>
+            </td>
+            <td>
+                <div><b>Id:</b> @invoice.Product.Id</div>
+                <div><b>Name:</b> @invoice.Product.Name</div>
+                <div><b>Unit Price:</b> @invoice.Product.UnitPrice.ToString("C")</div>
+                <div><b>Qty:</b> @invoice.Product.Qty</div>
+                <div><b>Discount:</b> @invoice.Product.Discount</div>
+                <div><b>Item Subtotal:</b> @invoice.Product.ItemSubtotal.ToString("C")</div>
+            </td>
+        </tr>
+    }
+</table>
