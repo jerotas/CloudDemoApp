@@ -200,7 +200,9 @@
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <Content Include="Views\Invoice\Credits.cshtml" />
     <Content Include="Views\Invoice\Index.cshtml" />
-    <Content Include="Views\Invoice\FilterInvoices.cshtml" />
+    <Content Include="Views\Invoice\FilterInvoicesByOrderId.cshtml" />
+    <Content Include="Views\Invoice\FilterInvoicesByProductId.cshtml" />
+    <Content Include="Views\Invoice\FilterInvoicesByCountry.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

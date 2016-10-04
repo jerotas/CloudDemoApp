@@ -23,9 +23,22 @@ namespace DotNet5CloudWeb.Controllers {
             return View(model);
         }
 
-        public ActionResult FilterInvoices(string orderId) {
-            var model = new InvoicesModel();
-            model.OrderIdFilter = int.Parse(orderId);
+        public ActionResult FilterInvoicesByOrderId(string orderId) {
+            var model = new InvoicesModel { OrderIdFilter = int.Parse(orderId) };
+            model.Invoices = SearchInvoices(model);
+
+            return View(model);
+        }
+
+        public ActionResult FilterInvoicesByProductId(string productId) {
+            var model = new InvoicesModel {ProductIdFilter = int.Parse(productId)};
+            model.Invoices = SearchInvoices(model);
+
+            return View(model);
+        }
+
+        public ActionResult FilterInvoicesByCountry(string country) {
+            var model = new InvoicesModel {CountryFilter = country};
             model.Invoices = SearchInvoices(model);
 
             return View(model);
@@ -52,7 +65,11 @@ namespace DotNet5CloudWeb.Controllers {
         private List<Invoice> SearchInvoices(InvoicesModel model) {
             var query = string.Empty;
 
-            if (model.OrderIdFilter.HasValue) {
+            if (!string.IsNullOrWhiteSpace(model.CountryFilter)) {
+                query = $"SELECT * FROM c WHERE c.Address.Country = '{model.CountryFilter}'";
+            } else if (model.ProductIdFilter.HasValue) {
+                query = $"SELECT * FROM c WHERE c.Product.Id = {model.ProductIdFilter.Value}";
+            } else if (model.OrderIdFilter.HasValue) {
                 query = $"SELECT * FROM c WHERE c.OrderId = {model.OrderIdFilter.Value}";
             } else {
                 query = "SELECT * FROM c";

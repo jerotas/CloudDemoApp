@@ -16,21 +16,21 @@
     @foreach (var invoice in Model.Invoices)
     {
         <tr valign="top">
-            <td>@invoice.OrderId</td>
+            <td>@Html.ActionLink(@invoice.OrderId.ToString(), "FilterInvoicesByOrderId", "Invoice", new { orderId = @invoice.OrderId.ToString() }, null)</td>
             <td>@invoice.OrderDate.ToShortDateString()</td>
             <td>
                 <div>@invoice.Address.Name</div>
                 <div>@invoice.Address.Street</div>
-                <div>@invoice.Address.City, @invoice.Address.Country @invoice.Address.PostalCode</div>
+                <div>@invoice.Address.City, @Html.ActionLink(@invoice.Address.Country, "FilterInvoicesByCountry", "Invoice", new { country = invoice.Address.Country }, null) @invoice.Address.PostalCode</div>
             </td>
             <td>
-                <div><b>Ship Date:</b> @invoice.ShipInfo.ShippedDate</div>
+                <div><b>Ship Date:</b> @invoice.ShipInfo.ShippedDate.ToShortDateString()</div>
                 <div><b>Shipper Name:</b> @invoice.ShipInfo.ShipperName</div>
                 <div><b>Freight:</b> @invoice.ShipInfo.Freight.ToString("C")</div>
             </td>
             <td>
                 <div><b>Id:</b> @invoice.Product.Id</div>
-                <div><b>Name:</b> @invoice.Product.Name</div>
+                <div><b>Name:</b> @Html.ActionLink(@invoice.Product.Name, "FilterInvoicesByProductId", "Invoice", new { productId = @invoice.Product.Id }, null)</div>
                 <div><b>Unit Price:</b> @invoice.Product.UnitPrice.ToString("C")</div>
                 <div><b>Qty:</b> @invoice.Product.Qty</div>
                 <div><b>Discount:</b> @invoice.Product.Discount</div>
