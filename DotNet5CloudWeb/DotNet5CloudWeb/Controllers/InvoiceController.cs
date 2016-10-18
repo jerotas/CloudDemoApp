@@ -9,11 +9,10 @@ using Microsoft.Azure.Documents.Client;
 
 namespace DotNet5CloudWeb.Controllers {
     public class InvoiceController : Controller {
-        private const string DbName = "North";
-
         private string DocumentDbEndPoint => ConfigurationManager.AppSettings["DDbEndPoint"];
 
         private string DocumentDbAuthKey => ConfigurationManager.AppSettings["DDbMasterKey"];
+        private string DocumentDbName => ConfigurationManager.AppSettings["DDbName"];
 
         #region Actions
         public ActionResult Index() {
@@ -54,7 +53,7 @@ namespace DotNet5CloudWeb.Controllers {
             DocumentClient ddbClient;
             using (ddbClient = new DocumentClient(new Uri(DocumentDbEndPoint), DocumentDbAuthKey)) {
                 var db = ddbClient.CreateDatabaseQuery()
-                    .Where(d => d.Id == DbName).AsEnumerable().FirstOrDefault();
+                    .Where(d => d.Id == DocumentDbName).AsEnumerable().FirstOrDefault();
 
                 var collectionQueryUri = $"dbs/{db.Id}/colls/Invoices";
                 var results = ddbClient.CreateDocumentQuery<T>(collectionQueryUri, query);
@@ -63,7 +62,7 @@ namespace DotNet5CloudWeb.Controllers {
         }
 
         private List<Invoice> SearchInvoices(InvoicesModel model) {
-            var query = string.Empty;
+            var query = "SELECT * FROM c";
 
             if (!string.IsNullOrWhiteSpace(model.CountryFilter)) {
                 query = $"SELECT * FROM c WHERE c.Address.Country = '{model.CountryFilter}'";
@@ -71,13 +70,18 @@ namespace DotNet5CloudWeb.Controllers {
                 query = $"SELECT * FROM c WHERE c.Product.Id = {model.ProductIdFilter.Value}";
             } else if (model.OrderIdFilter.HasValue) {
                 query = $"SELECT * FROM c WHERE c.OrderId = {model.OrderIdFilter.Value}";
-            } else {
-                query = "SELECT * FROM c";
-            }
+            } 
 
             var filteredInvoices = PerformQuery<Invoice>(query);
-            var invoiceList = filteredInvoices.ToList();
-            return invoiceList;
+
+            // You can also do faster parsing if you need less from it, and don't want to parse the entire JSON all the tiem.
+            //    JToken token = JObject.Parse(invoiceJSON.ToString());
+            //    var cName = (string)token.SelectToken("collegeName");
+            //    var branchId = (string) token.SelectToken("branches[0].branchId");
+            // OR - parse the entire document optionally.
+            //    Invoice deser = JsonConvert.DeserializeObject<Invoice>(invoiceJSON.ToString());
+
+            return filteredInvoices.ToList();
         }
         #endregion
     }
