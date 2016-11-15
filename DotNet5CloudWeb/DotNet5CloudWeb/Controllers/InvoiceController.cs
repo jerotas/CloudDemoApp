@@ -55,7 +55,7 @@ namespace DotNet5CloudWeb.Controllers {
                 var db = ddbClient.CreateDatabaseQuery()
                     .Where(d => d.Id == DocumentDbName).AsEnumerable().FirstOrDefault();
 
-                var collectionQueryUri = $"dbs/{db.Id}/colls/Invoices";
+                var collectionQueryUri = $"dbs/{db.Id}/colls/invoices";
                 var results = ddbClient.CreateDocumentQuery<T>(collectionQueryUri, query);
                 return results.ToList();
             }
